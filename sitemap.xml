@@ -13,7 +13,7 @@
 
   <url>
     <loc>http://example.com/</loc>
-    <lastmod>2023-05-14</lastmod>
+    <lastmod>2023-05-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -21,7 +21,7 @@
   
   <url>
     <loc>http://example.com/tags/sql%E6%B3%A8%E5%85%A5/</loc>
-    <lastmod>2023-05-14</lastmod>
+    <lastmod>2023-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
@@ -30,7 +30,7 @@
   
   <url>
     <loc>http://example.com/categories/CTF-WEB/</loc>
-    <lastmod>2023-05-14</lastmod>
+    <lastmod>2023-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
