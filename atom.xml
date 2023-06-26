@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2023-05-13T03:18:33.274Z</updated>
+  <updated>2023-06-26T16:47:13.498Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>HTTP头注入</title>
+    <link href="http://example.com/2023/06/27/HTTP%E5%A4%B4%E6%B3%A8%E5%85%A5/"/>
+    <id>http://example.com/2023/06/27/HTTP%E5%A4%B4%E6%B3%A8%E5%85%A5/</id>
+    <published>2023-06-26T16:45:05.000Z</published>
+    <updated>2023-06-26T16:47:13.498Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="HTTP头注入"><a href="#HTTP头注入" class="headerlink" title="HTTP头注入"></a>HTTP头注入</h1><h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>针对HTTP的请求头，如果不加以过滤或者转义，在直接与数据库交互的过程中容易被利用进行SQL注入攻击，即HTTP头注入。</p><blockquote><p>常见场景：访问Web Server时，Web Server会从HTTP Header中取出浏览器信息、IP地址、HOST信息等存储到数据库中。</p></blockquote><h2 id="实例测试"><a href="#实例测试" class="headerlink" title="实例测试"></a>实例测试</h2><p class='item-img' data-src='/../images/HTTP%E5%A4%B4%E6%B3%A8%E5%85%A5/image-20230626105842381.png'><img src="/../images/HTTP%E5%A4%B4%E6%B3%A8%E5%85%A5/image-20230626105842381.png" alt="image-20230626105842381"></p><ul><li>前提观察:无任何输入点，回显有访问时间，IP地址，以及User-Agent。</li></ul><p>使用BP抓包拦截。</p><p class='item-img' data-src='/../images/HTTP%E5%A4%B4%E6%B3%A8%E5%85%A5/image-20230626111306953.png'><img src="/../images/HTTP%E5%A4%B4%E6%B3%A8%E5%85%A5/image-20230626111306953.png" alt="image-20230626111306953">尝试修改User-Agent观察是否有修改，</p><p class='item-img' data-src='/../images/HTTP%E5%A4%B4%E6%B3%A8%E5%85%A5/image-20230626111531078.png'><img src="/../images/HTTP%E5%A4%B4%E6%B3%A8%E5%85%A5/image-20230626111531078.png" alt="image-20230626111531078"></p><p>发现回显修改了，推测服务器直接从User-Agent取值然后存入数据库中，尝试判断是否存在注入点。</p><p class='item-img' data-src='/../images/HTTP%E5%A4%B4%E6%B3%A8%E5%85%A5/image-20230626111745121.png'><img src="/../images/HTTP%E5%A4%B4%E6%B3%A8%E5%85%A5/image-20230626111745121.png" alt="image-20230626111745121"></p><p>通过单引号闭合’发现报错。</p><p>现在查看一下后端代码：</p><blockquote><p>贴出关键代码段</p></blockquote><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs mysql">$ip_address = $_SERVER[&quot;REMOTE_ADDR&quot;];<br>$user_agent = $_SERVER[&quot;HTTP_USER_AGENT&quot;];<br><br>// Writes the entry into the database<br>$sql = &quot;INSERT INTO visitors (date, user_agent, ip_address) VALUES (now(), &#x27;&quot; . sqli($user_agent) . &quot;&#x27;, &#x27;&quot; . $ip_address . &quot;&#x27;)&quot;;<br><br>$recordset = $link-&gt;query($sql);<br><br>if(!$recordset)<br>&#123;<br><br>    die(&quot;Error: &quot; . $link-&gt;error);<br><br>&#125;<br></code></pre></td></tr></table></figure><p>可以发现服务器的操作是通过 INSERT INTO VALUES 语句ip_address 和 user-agent 插入数据库中且第一个参数为user-agent，第二个为ip_address。</p><p>由此我们开始构造注入语句:</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">hack&#x27;,(selectdatabase()));#<br></code></pre></td></tr></table></figure><p class='item-img' data-src='/../images/HTTP%E5%A4%B4%E6%B3%A8%E5%85%A5/image-20230627002653519.png'><img src="/../images/HTTP%E5%A4%B4%E6%B3%A8%E5%85%A5/image-20230627002653519.png" alt="image-20230627002653519"></p><p>成功注入。</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;HTTP头注入&quot;&gt;&lt;a href=&quot;#HTTP头注入&quot; class=&quot;headerlink&quot; title=&quot;HTTP头注入&quot;&gt;&lt;/a&gt;HTTP头注入&lt;/h1&gt;&lt;h2 id=&quot;定义&quot;&gt;&lt;a href=&quot;#定义&quot; class=&quot;headerlink&quot; title=&quot;定</summary>
+      
+    
+    
+    
+    <category term="CTF-WEB" scheme="http://example.com/categories/CTF-WEB/"/>
+    
+    
+    <category term="sql注入" scheme="http://example.com/tags/sql%E6%B3%A8%E5%85%A5/"/>
+    
+  </entry>
   
   <entry>
     <title>判断sql注入点</title>
